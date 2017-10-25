@@ -42,12 +42,17 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get remove -y --purge liblua5.1-dev libid
 	&& DEBIAN_FRONTEND=noninteractive apt-get autoremove --purge -y \
 	&& rm -rf /var/lib/apt/lists/*
 	
+COPY ./entrypoint.sh /entrypoint.sh
+RUN chmod 755 /entrypoint.sh
+	
 RUN sed -i '1s/^/daemonize = false;\n/' /etc/prosody/prosody.cfg.lua \
 	&& perl -i -pe 'BEGIN{undef $/;} s/^log = {.*?^}$/log = {\n    {levels = {min = "info"}, to = "console"};\n}/smg' /etc/prosody/prosody.cfg.lua
 	
-VOLUME ["/etc/prosody", "/usr/lib/prosody/prosody-modules", "/var/log/prosody", "/var/lib/prosody/"]
+VOLUME ["/etc/prosody", "/usr/lib/prosody/prosody-modules", "/var/lib/prosody/", "/var/log/prosody"]
 	
 EXPOSE 80 443 5222 5269 5347 5280 5281
 USER prosody
 ENV __FLUSH_LOG yes
+
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["prosody"]

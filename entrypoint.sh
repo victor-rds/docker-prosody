@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+set -x
 
 if [[ "$1" != "prosody" ]]; then
     exec prosodyctl $*
@@ -10,10 +11,7 @@ if [ "$LOCAL" -a  "$PASSWORD" -a "$DOMAIN" ] ; then
     prosodyctl register $LOCAL $DOMAIN $PASSWORD
 fi
 
-exec "$@"
-
-set -e
-set -x
+if [[ ]]
 
 if [[ -n $DOMAIN ]]; then
    # tweak config
