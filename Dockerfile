@@ -53,8 +53,10 @@ RUN adduser --disabled-password --quiet --system \
             --gecos "Prosody XMPP Server" --group prosody \
 	&& adduser --quiet prosody ssl-cert \
 	&& mkdir /var/log/prosody \
+	&& mkdir /var/run/prosody \
 	&& mkdir /usr/lib/prosody/prosody-modules \
 	&& chown -R prosody:adm /var/log/prosody \
+	&& chown -R prosody:adm /var/run/prosody \
 	&& chown -R prosody:prosody /usr/lib/prosody/prosody-modules \
 	&& chown -R prosody:prosody /var/lib/prosody \
 	&& chown -R prosody:prosody /etc/prosody \
