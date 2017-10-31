@@ -1,6 +1,6 @@
 FROM ubuntu
 
-ENV PROSODY_VERSION 0.10
+ENV PROSODY_VERSION=0.10 USER=admin DOMAIN=localhost PASSWORD=""
 
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
@@ -18,11 +18,13 @@ RUN apt-get update \
 	lua-sec \
 	lua-socket \
 	lua-zlib \
+	lua-ldap \
 	lua5.1 \
 	openssl \
 	ca-certificates \
 	ssl-cert \
 	mercurial \
+	adduser \
 	&& DEBIAN_FRONTEND=noninteractive apt-get build-dep -y prosody
 	
 
@@ -35,24 +37,37 @@ RUN hg clone https://hg.prosody.im/trunk $PROSODY_VERSION \
 	&& make \
 	&& make install \
 	&& make clean \
-	&& cd .. \
-	&& rm -rf prosody
+	&& rm -rf prosody/*
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get remove -y --purge liblua5.1-dev libidn11-dev libssl-dev debhelper txt2man binutils build-essential bsdmainutils \
 	&& DEBIAN_FRONTEND=noninteractive apt-get autoremove --purge -y \
 	&& rm -rf /var/lib/apt/lists/*
-	
-COPY ./entrypoint.sh /entrypoint.sh
-RUN chmod 755 /entrypoint.sh
-	
+		
 RUN sed -i '1s/^/daemonize = false;\n/' /etc/prosody/prosody.cfg.lua \
-	&& perl -i -pe 'BEGIN{undef $/;} s/^log = {.*?^}$/log = {\n    {levels = {min = "info"}, to = "console"};\n}/smg' /etc/prosody/prosody.cfg.lua
+	&& sed -i 's/enabled = false -- Remove this line to enable/enabled = true -- false to disable/' /etc/prosody/prosody.cfg.lua \
+	&& perl -i -pe 'BEGIN{undef $/;} s/^log = {.*?^}$/log = {\n    {levels = {min = "info"}, to = "console"};\n}/smg' /etc/prosody/prosody.cfg.lua \
+	&& cp -r /etc/prosody/* .
+
+RUN adduser --disabled-password --quiet --system \
+            --home "/var/lib/prosody" --no-create-home \
+            --gecos "Prosody XMPP Server" --group prosody \
+	&& adduser --quiet prosody ssl-cert \
+	&& mkdir /var/log/prosody \
+	&& mkdir /usr/lib/prosody/prosody-modules \
+	&& chown -R prosody:adm /var/log/prosody \
+	&& chown -R prosody:prosody /usr/lib/prosody/prosody-modules \
+	&& chown -R prosody:prosody /var/lib/prosody \
+	&& chown -R prosody:prosody /etc/prosody \
+	&& chown -R prosody:prosody /usr/local/src/prosody
 	
 VOLUME ["/etc/prosody", "/usr/lib/prosody/prosody-modules", "/var/lib/prosody/", "/var/log/prosody"]
 	
 EXPOSE 80 443 5222 5269 5347 5280 5281
-USER prosody
 ENV __FLUSH_LOG yes
 
+COPY ./entrypoint.sh /entrypoint.sh
+RUN chmod 755 /entrypoint.sh
+
+USER prosody
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["prosody"]
