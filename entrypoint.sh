@@ -14,11 +14,6 @@ if [ "$USER" -a  "$PASSWORD" -a "$DOMAIN" ] ; then
     prosodyctl register $USER $DOMAIN $PASSWORD
 fi
 
-if [[ -n $DOMAIN ]]; then
-   # tweak config
-	sed -i "s/example.com/$DOMAIN/g" /etc/prosody/prosody.cfg.lua
-fi
-
 if find /usr/lib/prosody/prosody-modules -mindepth 1 -print -quit | grep -q .; then
     cd /usr/lib/prosody/prosody-modules
 	hg pull --update

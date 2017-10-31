@@ -60,7 +60,7 @@ RUN adduser --disabled-password --quiet --system \
 	&& chown -R prosody:prosody /etc/prosody \
 	&& chown -R prosody:prosody /usr/local/src/prosody
 	
-VOLUME ["/etc/prosody", "/usr/lib/prosody/prosody-modules", "/var/lib/prosody/", "/var/log/prosody"]
+VOLUME [ "/etc/prosody", "/usr/lib/prosody/prosody-modules", "/var/lib/prosody/" ]
 	
 EXPOSE 80 443 5222 5269 5347 5280 5281
 ENV __FLUSH_LOG yes
@@ -70,4 +70,4 @@ RUN chmod 755 /entrypoint.sh
 
 USER prosody
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["prosody"]
+CMD [ "prosody" ]
