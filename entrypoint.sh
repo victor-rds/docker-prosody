@@ -2,7 +2,7 @@
 set -e
 
 if [[ -z  /etc/prosody/prosody.cfg.lua ]]; then
-	cp -r /usr/local/src/prosody/* /etc/prosody/
+	cp -r /usr/local/src/prosody/etc/prosody/* /etc/prosody/
 fi
 
 if [[ "$1" != "prosody" ]]; then

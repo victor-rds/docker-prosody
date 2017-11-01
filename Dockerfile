@@ -25,6 +25,8 @@ RUN apt-get update \
 	ssl-cert \
 	mercurial \
 	adduser \
+	wget \
+	tar \
 	&& DEBIAN_FRONTEND=noninteractive apt-get build-dep -y prosody
 	
 
@@ -37,7 +39,7 @@ RUN hg clone https://hg.prosody.im/trunk $PROSODY_VERSION \
 	&& make \
 	&& make install \
 	&& make clean \
-	&& rm -rf prosody/*
+	&& cd .. && rm -rf prosody/*
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get remove -y --purge liblua5.1-dev libidn11-dev libssl-dev debhelper txt2man binutils build-essential bsdmainutils \
 	&& DEBIAN_FRONTEND=noninteractive apt-get autoremove --purge -y \
@@ -46,8 +48,9 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get remove -y --purge liblua5.1-dev libid
 RUN sed -i '1s/^/daemonize = false;\n/' /etc/prosody/prosody.cfg.lua \
 	&& sed -i 's/enabled = false -- Remove this line to enable/enabled = true -- false to disable/' /etc/prosody/prosody.cfg.lua \
 	&& perl -i -pe 'BEGIN{undef $/;} s/^log = {.*?^}$/log = {\n    {levels = {min = "info"}, to = "console"};\n}/smg' /etc/prosody/prosody.cfg.lua \
-	&& cp -r /etc/prosody/* .
-
+	&& mkdir -p prosody/etc \
+	&& cp -r /etc/prosody prosody/etc/
+	
 RUN adduser --disabled-password --quiet --system \
             --home "/var/lib/prosody" --no-create-home \
             --gecos "Prosody XMPP Server" --group prosody \
@@ -57,13 +60,14 @@ RUN adduser --disabled-password --quiet --system \
 	&& mkdir /usr/lib/prosody/prosody-modules \
 	&& chown -R prosody:adm /var/log/prosody \
 	&& chown -R prosody:adm /var/run/prosody \
-	&& chown -R prosody:prosody /usr/lib/prosody/prosody-modules \
 	&& chown -R prosody:prosody /var/lib/prosody \
 	&& chown -R prosody:prosody /etc/prosody \
+	&& chown -R prosody:prosody /usr/lib/prosody/prosody-modules \
 	&& chown -R prosody:prosody /usr/local/src/prosody
-	
-VOLUME [ "/etc/prosody", "/usr/lib/prosody/prosody-modules", "/var/lib/prosody/" ]
-	
+
+VOLUME [ "/etc/prosody", "/usr/lib/prosody/prosody-modules", "/var/lib/prosody" ]
+WORKDIR /var/lib/prosody
+
 EXPOSE 80 443 5222 5269 5347 5280 5281
 ENV __FLUSH_LOG yes
 
@@ -71,5 +75,5 @@ COPY ./entrypoint.sh /entrypoint.sh
 RUN chmod 755 /entrypoint.sh
 
 USER prosody
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT [ "/entrypoint.sh" ]
 CMD [ "prosody" ]
