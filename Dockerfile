@@ -8,6 +8,7 @@ RUN apt-get update \
 	adduser \
 	libidn11 \
 	libssl1.0.0 \
+	lua5.1 \
 	lua-bitop \
 	lua-dbi-mysql \
 	lua-dbi-postgresql \
@@ -19,7 +20,11 @@ RUN apt-get update \
 	lua-socket \
 	lua-zlib \
 	lua-ldap \
-	lua5.1 \
+	lua-cyrussasl \
+	sasl2-bin \
+	libsasl2-modules-ldap \
+	libsasl2-modules-otp \
+	libsasl2-modules-sql \
 	openssl \
 	ca-certificates \
 	ssl-cert \
@@ -55,6 +60,7 @@ RUN adduser --disabled-password --quiet --system \
             --home "/var/lib/prosody" --no-create-home \
             --gecos "Prosody XMPP Server" --group prosody \
 	&& adduser --quiet prosody ssl-cert \
+	&& adduser --quiet prosody sasl \
 	&& mkdir /var/log/prosody \
 	&& mkdir /var/run/prosody \
 	&& mkdir /usr/lib/prosody/prosody-modules \
