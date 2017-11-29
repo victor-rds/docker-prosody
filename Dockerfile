@@ -68,7 +68,7 @@ RUN adduser --disabled-password --quiet --system \
 VOLUME [ "/etc/prosody", "/usr/lib/prosody/prosody-modules", "/var/lib/prosody" ]
 WORKDIR /var/lib/prosody
 
-EXPOSE 80 443 5222 5269 5347 5280 5281
+EXPOSE 5222 5269 5347 5280 5281
 ENV __FLUSH_LOG yes
 
 COPY ./entrypoint.sh /entrypoint.sh
